@@ -21,15 +21,13 @@ class PostController extends Controller
     {
         try {
             $posts = Post::where("status", 1)->orderByDesc('id')->with('product')->with('user')->get();
-            if(count($posts) < 1){
+            if (count($posts) < 1) {
                 return response([], 404);
             }
             return response($posts);
-
         } catch (\Throwable $th) {
             throw new ErrorException('System failed to fetch requested data');
         }
-        
     }
 
     /**
@@ -44,28 +42,28 @@ class PostController extends Controller
         $action = "create-post";
 
         $fields = ['title' => $request->input('title'), 'description' => $request->input('description'), 'product' => $request->input('product')];
-        
+
         //log initial request
-        Log::channel('audit')->info($request->bearerToken(), ['action' => $action, 'status' => 'start', 'data' => ['user' => $request->user()->id , $fields]]);
+        Log::channel('audit')->info($request->bearerToken(), ['action' => $action, 'status' => 'start', 'data' => ['user' => $request->user()->id, $fields]]);
 
         $validator = Validator::make($fields, [
             'title' => 'required|string|min:10|max:255',
             'description' => 'required|string|min:10|max:1000',
             'product' => 'required|integer|exists:products,id'
-        ]); 
-        
+        ]);
+
         //Handle validation failed scenario
-        if ($validator->fails()){
+        if ($validator->fails()) {
             Log::channel('audit')->error($request->bearerToken(), ['action' => $action, 'status' => 'validation-failed', ['data' => $validator->errors()]]);
             throw new ValidationException($validator);
         }
 
-        try{
+        try {
 
             $status = 0;
             $approved_by = NULL;
 
-            if($request->user()->isAdministrator()){
+            if ($request->user()->isAdministrator()) {
                 $status = 1;
                 $approved_by = $request->user()->id;
             }
@@ -79,20 +77,17 @@ class PostController extends Controller
                 'approved_user_id' => $approved_by
             ]);
 
-            if(isset($post['id'])){
-                Log::channel('audit')->error($request->bearerToken(), ['action' => $action, 'status' => 'success', 'data' => ['id' => $post['id']]]);
-            }else{
+            if (isset($post['id'])) {
+                Log::channel('audit')->info($request->bearerToken(), ['action' => $action, 'status' => 'success', 'data' => ['id' => $post['id']]]);
+            } else {
                 Log::channel('audit')->error($request->bearerToken(), ['action' => $action, 'status' => 'fail', 'data' => []]);
             }
             return response($post);
-
         } catch (\Throwable $th) {
             //handle exception
             Log::channel('audit')->error($request->bearerToken(), ['action' => $action, 'status' => 'failed', 'data' => [$th->getMessage()]]);
             throw new ErrorException('System failed to create new record');
         }
-
-        
     }
 
     /**
@@ -106,26 +101,24 @@ class PostController extends Controller
         //Validate user input
         $inputs = ['id' => $id];
         $validator = Validator::make($inputs, ['id' => 'required|integer']);
-        
+
         //Handle validation failed scenario
-        if ($validator->fails()){
+        if ($validator->fails()) {
             throw new ValidationException($validator);
         }
-        
-        try{
+
+        try {
             //Fetch post by id
             $post = Post::where('id', $id)->with('product')->with('user')->first();
-            if(!$post){
+            if (!$post) {
                 return response([], 404);
             }
             return response($post);
-            
-        }catch (\Throwable $th) {
+        } catch (\Throwable $th) {
             throw new ErrorException('System failed to fetch requested data');
         }
-        
     }
-    
+
     /**
      * Display the specified resource related to the user.
      *
@@ -134,19 +127,17 @@ class PostController extends Controller
      */
     public function byUser(Request $request)
     {
-        try{
+        try {
             //Fetch posts created by the logged in user     
             $post = $request->user()->posts()->orderByDesc('id')->with('product')->with('user')->get();
 
-            if(count($post) < 1){
+            if (count($post) < 1) {
                 return response([], 404);
             }
             return response($post);
-
-        }catch (\Throwable $th) {
+        } catch (\Throwable $th) {
             throw new ErrorException('System failed to fetch requested data');
         }
-        
     }
 
     /**
@@ -161,51 +152,47 @@ class PostController extends Controller
         $action = "delete-post";
 
         $inputs = ['id' => $id];
-        
+
         //Log request
-        Log::channel('audit')->info($request->bearerToken(), ['action' => $action, 'status' => 'start', 'data' => ['user' => $request->user()->id , 'post' => $inputs['id']]]);
+        Log::channel('audit')->info($request->bearerToken(), ['action' => $action, 'status' => 'start', 'data' => ['user' => $request->user()->id, 'post' => $inputs['id']]]);
 
         //Validate request
         $validator = Validator::make($inputs, ['id' => 'required|integer|exists:posts,id']);
-        
+
         //handle validation failed scenario
-        if ($validator->fails()){
+        if ($validator->fails()) {
             Log::channel('audit')->error($request->bearerToken(), ['action' => $action, 'status' => 'validation-failed', ['data' => $validator->errors()]]);
             throw new ValidationException($validator);
         }
 
 
-        try{
+        try {
             //Find the requested Post
             $post = Post::find($id);
 
             //check whether user has permission to delete the requested post
             if (!Gate::allows($action, $post)) {
                 Log::channel('audit')->error($request->bearerToken(), ['action' => $action, 'status' => 'permission-denied', 'data' => []]);
-                
+
                 return response(['error' => 'Permission Denied'], 403);
             }
 
             $stat = false;
-            if($post){
+            if ($post) {
                 //Delete post if available
                 $stat = $post->delete();
             }
-            if($stat == true){
-                Log::channel('audit')->error($request->bearerToken(), ['action' => $action, 'status' => 'success', 'data' => []]);
-            }else{
+            if ($stat == true) {
+                Log::channel('audit')->info($request->bearerToken(), ['action' => $action, 'status' => 'success', 'data' => []]);
+            } else {
                 Log::channel('audit')->error($request->bearerToken(), ['action' => $action, 'status' => 'failed', 'data' => []]);
             }
 
             return response(['status' => $stat]);
-
         } catch (\Throwable $th) {
             //handle exception
             Log::channel('audit')->error($request->bearerToken(), ['action' => $action, 'status' => 'failed', 'data' => [$th->getMessage()]]);
             throw new ErrorException('System failed to delete this record');
         }
-        
-
-        
     }
 }
