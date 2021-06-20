@@ -23,7 +23,7 @@ class AdminController extends Controller
 
         try {
             //Fetch pending posts
-            $posts = Post::where("status", 0)->with('produc')->with('user')->get();
+            $posts = Post::where("status", 0)->with('product')->with('user')->get();
 
             //If no pending post available, return not found
             if (count($posts) < 1) {
