@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\ProductController;
@@ -20,17 +21,21 @@ use Illuminate\Support\Facades\Route;
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
-Route::get('/posts', [PostController::class, 'index']);
-
-
-//Route::get('/products', [ProductController::class, 'index']);
 Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::get('/products', [ProductController::class, 'index']);
     Route::get('/role', [AuthController::class, 'role']);
+
+    //view all approved posts
     
+    Route::get('/posts', [PostController::class, 'index']);
+    Route::get('/posts/created', [PostController::class, 'byUser']);
+    Route::get('/posts/{id}', [PostController::class, 'show']);
     Route::post('/posts/store', [PostController::class, 'store']);
     Route::delete('/posts/{id}', [PostController::class, 'destroy']);
-    Route::get('/posts/{id}', [PostController::class, 'show']);
+
+
+    Route::get('/admin/posts/pending', [AdminController::class, 'viewUnapprovedPosts']);
+    Route::put('/admin/posts/approve/{id}', [AdminController::class, 'updatePostStatus']);
 });
 
 //Route::resource('products', ProductController::class);

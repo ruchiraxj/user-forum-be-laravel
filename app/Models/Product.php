@@ -18,4 +18,8 @@ class Product extends Model
         'name',
         'image'
     ];
+
+    public function posts(){
+        return $this->hasMany(Post::class);
+    }
 }

@@ -30,5 +30,12 @@ class AuthServiceProvider extends ServiceProvider
         Gate::define('delete-post', function (User $user, Post $post) {
             return $user->id === $post->user_id;
         });
+        
+        Gate::define('view-pending-posts', function (User $user) {
+            return $user->isAdministrator();
+        });
+        Gate::define('approve-posts', function (User $user) {
+            return $user->isAdministrator();
+        });
     }
 }
