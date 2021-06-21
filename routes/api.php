@@ -27,6 +27,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
 
     //view all approved posts
     
+    Route::get('/posts/search', [PostController::class, 'search']);
     Route::get('/posts', [PostController::class, 'index']);
     Route::get('/posts/created', [PostController::class, 'byUser']);
     Route::get('/posts/{id}', [PostController::class, 'show']);

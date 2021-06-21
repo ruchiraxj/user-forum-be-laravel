@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -32,5 +33,13 @@ class Post extends Model
 
     public function product(){
         return $this->belongsTo(Product::class);
+    }
+
+    public function searchByUser($key){
+        $posts = $this->where("status", 1)->where("title", 'like', '%'.$key.'%')->orWhereHas('user', function (Builder $query) use($key) {
+            $query->where('name', 'like', '%'.$key.'%');
+        })->with('product')->with('user')->orderByDesc('id')->get();
+
+        return $posts;
     }
 }

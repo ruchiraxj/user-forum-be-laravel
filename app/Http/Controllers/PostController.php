@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Post;
 use ErrorException;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -194,5 +195,28 @@ class PostController extends Controller
             Log::channel('audit')->error($request->bearerToken(), ['action' => $action, 'status' => 'failed', 'data' => [$th->getMessage()]]);
             throw new ErrorException('System failed to delete this record');
         }
+    }
+
+
+    public function search(Request $request){
+        $key = $request->query('key');
+        
+        if($key == ""){
+            return $this->index();
+        }
+
+        try{
+            
+            $post = new Post();
+            $posts = $post->searchByUser($key);
+            if (count($posts) < 1) {
+                return response([], 404);
+            }
+            return response($posts);
+
+        } catch (\Throwable $th) {
+            throw new ErrorException('System failed to fetch requested data');
+        }
+        
     }
 }
