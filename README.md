@@ -1,7 +1,15 @@
-# user-forum-be-laravel
-API based user forum with Laravel
-
-
+# API based user forum with Laravel
+# Prerequisite
+- Apache
+- PHP
+- MySQL
+- Composer 
+# Installation Steps
+1. Clone repository
+2. Open terminal and run the command "composer install"
+3. Create new database "user_forum_laravel"
+4. Open file ".env" and change the Database configurations
+5. Open terminal and execute "php artisan migrate"
 # HTTP status and error codes
 - 200 - Success
 - 201 - Success
