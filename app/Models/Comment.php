@@ -22,6 +22,9 @@ class Comment extends Model
 
     public $timestamps = true;
 
+    protected $casts = [
+        'created_at' => 'date:Y-m-d H:i:s',
+    ];
 
     public function user(){
         return $this->belongsTo(User::class);
