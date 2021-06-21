@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CommentController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\ProductController;
 use Illuminate\Http\Request;
@@ -25,8 +26,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::get('/products', [ProductController::class, 'index']);
     Route::get('/role', [AuthController::class, 'role']);
 
-    //view all approved posts
-    
+    //Posts
     Route::get('/posts/search', [PostController::class, 'search']);
     Route::get('/posts', [PostController::class, 'index']);
     Route::get('/posts/created', [PostController::class, 'byUser']);
@@ -34,7 +34,11 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('/posts/store', [PostController::class, 'store']);
     Route::delete('/posts/{id}', [PostController::class, 'destroy']);
 
+    //Comments
+    Route::get('/comments/by-post/{id}', [CommentController::class, 'show']);
+    Route::post('/comments/store', [CommentController::class, 'store']);
 
+    //Admin
     Route::get('/admin/posts/pending', [AdminController::class, 'viewUnapprovedPosts']);
     Route::put('/admin/posts/approve/{id}', [AdminController::class, 'updatePostStatus']);
 });

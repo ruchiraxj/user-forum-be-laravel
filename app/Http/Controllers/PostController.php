@@ -110,7 +110,7 @@ class PostController extends Controller
 
         try {
             //Fetch post by id
-            $post = Post::where('id', $id)->with('product')->with('user')->first();
+            $post = Post::where('id', $id)->with('product')->with('user')->with('comments')->first();
             if (!$post) {
                 return response([], 404);
             }

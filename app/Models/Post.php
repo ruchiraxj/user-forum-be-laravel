@@ -34,6 +34,10 @@ class Post extends Model
     public function product(){
         return $this->belongsTo(Product::class);
     }
+    
+    public function comments(){
+        return $this->hasMany(Comment::class);
+    }
 
     public function searchByUser($key){
         $posts = $this->where("status", 1)->where("title", 'like', '%'.$key.'%')->orWhereHas('user', function (Builder $query) use($key) {
