@@ -5,6 +5,7 @@ namespace App\Exceptions;
 use ErrorException;
 use Exception;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Translation\Exception\NotFoundResourceException;
 use Throwable;
@@ -52,6 +53,10 @@ class Handler extends ExceptionHandler
 
         $this->renderable(function (ErrorException $e) {
             return response()->json(['error' => $e->getMessage()], 500);
+        });
+
+        $this->renderable(function (AccessDeniedHttpException $e) {
+            return response()->json(['error' => $e->getMessage()], 403);
         });
     }
 }

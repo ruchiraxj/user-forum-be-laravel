@@ -12,14 +12,15 @@ use Illuminate\Validation\ValidationException;
 
 class AdminController extends Controller
 {
+    public function __construct()
+    {
+        // $this->middleware('can:viewPending,App\Policy\Admin')->only('viewUnapprovedPosts');
+        // $this->middleware('can:changeStatus,App\Policy\Admin')->only('updatePostStatus');
+    }
     public function viewUnapprovedPosts(Request $request)
     {
-        //ID to identify the method
+        // ID to identify the method
         $action = "view-pending-posts";
-
-        if (!Gate::allows($action)) {
-            return response(['error' => 'Permission Denied'], 403);
-        }
 
         try {
             //Fetch pending posts
@@ -44,11 +45,6 @@ class AdminController extends Controller
 
         //log initial request
         Log::channel('admin')->info($request->bearerToken(), ['action' => $action, 'status' => 'start', 'data' => ['user' => $request->user()->id, 'post' => $id, 'status' => $request->input('status')]]);
-
-        //check permission whether the logged in user has permission to access the file
-        if (!Gate::allows($action)) {
-            return response(['error' => 'Permission Denied'], 403);
-        }
 
         //input validation
         $inputs = ['id' => $id, 'status' => $request->input('status')];

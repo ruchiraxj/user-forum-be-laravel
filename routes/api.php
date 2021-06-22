@@ -37,14 +37,12 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     //Comments
     Route::get('/comments/by-post/{id}', [CommentController::class, 'show']);
     Route::post('/comments/store', [CommentController::class, 'store']);
+  
+});
 
+
+Route::group(['middleware' => ['auth:sanctum', 'can:accessAdmin,App\Policy\Admin']], function () {
     //Admin
     Route::get('/admin/posts/pending', [AdminController::class, 'viewUnapprovedPosts']);
     Route::put('/admin/posts/approve/{id}', [AdminController::class, 'updatePostStatus']);
-});
-
-//Route::resource('products', ProductController::class);
-
-Route::middleware('auth:api')->get('/user', function (Request $request) {
-    return $request->user();
 });
